@@ -1,36 +1,15 @@
 #include <Adafruit_Si7021.h>
 #include "RF24.h"
 #include <SPI.h>
-
-
-#define PIN_CSN 11
-#define PIN_CE  12
-#define VBATPIN A7
+#include "config.h"
+#include <Adafruit_SleepyDog.h>
 
 RF24 radio(PIN_CE, PIN_CSN);
 
 Adafruit_Si7021 sensor = Adafruit_Si7021();
 
-const uint64_t pipes[2] = { 0xABCDABCD71LL, 0x544d52687CLL };
-
 int sensorId = 0;
 uint8_t sensorError = 0;
-
-#define CHARGE_CURVE_POINTS 7
-unsigned int batt_mv_curve[] = { 4200, 4030, 3860, 3830, 3790, 3700, 3600 };
-unsigned char batt_charge_curve[] = { 100, 76, 52, 42, 30, 11, 0 };
-
-struct __attribute__((packed)) SensorPacket
-{
-  uint8_t sensorId;
-  uint8_t status;
-  uint32_t localTime;
-  uint8_t battery;
-  uint16_t temperature;
-  uint16_t humidity;
-  uint16_t airquality;
-  uint16_t pressure;
-};
 
 unsigned char charge_lookup(unsigned int * mv_curve, unsigned char * charge_curve, unsigned int mv_in) {
   unsigned char charge = 0;
@@ -77,8 +56,8 @@ unsigned int getBatteryVoltage() {
 }
 
 void setup(void) {
-  Serial.begin(115200);
-
+  //pinMode(LED_BUILTIN, OUTPUT);
+  
   sensorId = 0;
 
   radio.begin();
@@ -136,5 +115,7 @@ void loop(void) {
 
   Serial.println("---");
 
-  delay(1000);
+  Watchdog.sleep(5000);
+
+  //delay(1000);
 }
